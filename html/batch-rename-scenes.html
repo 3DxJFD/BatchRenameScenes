@@ -1,0 +1,87 @@
+<html>
+  <head>
+    <title>Batch Rename Scenes</title>
+    <style>
+    body {
+      font-family: sans-serif;
+    }
+    #scenesList ul {
+      list-style-type: none; /* Removes bullet points */
+      padding: 0; /* Optional: Removes default padding */
+    }
+    </style>
+  </head>
+    <body>
+        
+    <div style="padding: 20px; text-align: center;">
+      <label for="newName">Base Name:</label>
+      <br>
+      <input type="text" id="newName" style="width: 80%;">
+      <br>
+
+      <!-- Scenes list will be populated here -->
+      <div id="scenesList"></div>
+      <br>
+
+      <button onclick="submitSelection()">Rename Selected</button>
+      <button onclick="closeDialog()">Cancel</button>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        populateScenes(); 
+      });
+    </script>
+          
+
+    <script>
+      var scenes = []; 
+
+      function populateScenes() {
+        var listHtml = '<ul>';
+        scenes.forEach(function(scene, index) {
+            listHtml += '<li><input type="checkbox" id="scene_' + index + '" name="scene" value="' + scene.name + '">';
+            listHtml += '<label for="scene_' + index + '">' + scene.name + '</label></li>';
+        });
+        listHtml += '</ul>';
+        document.getElementById('scenesList').innerHTML = listHtml;
+      }
+
+      function closeDialog() {
+        sketchup.closeDialog(); 
+      }
+
+      function submitSelection() {
+        var baseName = document.getElementById('newName').value;
+        if (!baseName) {
+          alert("Please enter a base name.");
+          return;
+        }
+
+        var selectedScenes = [];
+
+        var checkboxes = document.querySelectorAll('input[name="scene"]:checked');
+        checkboxes.forEach(function(cb) {
+          selectedScenes.push(cb.value);
+        });
+
+        if (selectedScenes.length === 0) {
+          alert("Please select at least one scene.");
+          return;
+        }
+
+        var scenesString = selectedScenes.join(',') + "|" + baseName;
+        sketchup.performActionOnSelectedScenes(scenesString);
+
+        sketchup.requestUpdatedScenes();
+      }
+
+      function updateScenesList(updatedScenes) {
+        scenes = updatedScenes; // Update the global scenes variable
+        populateScenes(); // Repopulate the scenes list
+      }
+      
+      populateScenes();
+    </script>
+  </body>
+</html>
